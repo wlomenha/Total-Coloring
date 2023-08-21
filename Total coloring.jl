@@ -1,4 +1,4 @@
-using DelimitedFiles, JuMP, Gurobi
+using DelimitedFiles, JuMP, Gurobi, Pkg, Graphs, GraphPlot, Colors, Cairo, Fontconfig
 
 # Convert adjacency matrix to a list of edges
 function adj_matrix_to_edges(A::Matrix{Int})
@@ -67,10 +67,53 @@ function total_coloring(A::Matrix{Int}, colors)
     return model
 end
 
+function plot_colored_graph(A::Matrix{Int}, model)
+    # Create a graph from the adjacency matrix
+    g = SimpleGraph(A)
+
+    # Extract the edges and vertices' colors from the model's solution
+    edge_colors = Dict()
+    vertex_colors = Dict()
+    C = 1:4
+    color_map = [colorant"red", colorant"blue", colorant"green", colorant"yellow"]  # You can modify the color list as per your preference
+
+    for e in edges(g)
+        for c in C
+            if value(model[:y][(src(e), dst(e)), c]) > 0.5
+                edge_colors[e] = color_map[c]
+                break
+            end
+        end
+    end
+
+    for v in vertices(g)
+        for c in C
+            if value(model[:x][v, c]) > 0.5
+                vertex_colors[v] = color_map[c]
+                break
+            end
+        end
+    end
+
+    # Plot the graph with colored edges and vertices
+    nodefillc = [vertex_colors[v] for v in vertices(g)]
+    edgestrokec = [edge_colors[e] for e in edges(g)]
+    
+   # Adjusting the layout function for gplot
+   layout_func(g) = spring_layout(g)
+    
+   # Display the graph directly
+   node_labels = [string(v) for v in vertices(g)]
+   display(gplot(g, nodelabel = node_labels, nodefillc=nodefillc, edgestrokec=edgestrokec, layout=layout_func))
+    
+    println("Graph has been saved as colored_graph.png")
+end
+
 # Main function to execute the program
 function main(path::String,  colors)
     A = read_adjacency_matrix(path)
     model = total_coloring(A, colors)
+    plot_colored_graph(A,model)
     
     println("Número mínimo de cores necessárias: ", objective_value(model))
     
@@ -92,6 +135,6 @@ function main(path::String,  colors)
 end
 
 # Call the main function with the desired path
-path = "D:\\GitHub - Projects\\Total Coloring\\newrandom3regulargraph.txt"
+path = "D:\\GitHub - Projects\\Total Coloring\\randomgraph3regular.txt"
 colors = 4
 main(path, colors)
