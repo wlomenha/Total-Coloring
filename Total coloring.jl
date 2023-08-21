@@ -1,5 +1,6 @@
 using DelimitedFiles, JuMP, Gurobi 
 
+#Contrução das arestas
 function adj_matrix_to_edges(A)
     n = size(A, 1)
     edges = []
@@ -13,10 +14,10 @@ function adj_matrix_to_edges(A)
     return edges
 end
 
-path = "D:\\GitHub - Projects\\Total Coloring\\newrandom3regulargraph.txt"
+path = "D:\\GitHub - Projects\\Total Coloring\\G(2,0) Fullerene.txt"
 
 # Inicialização da matriz de adjacência
-n = 14
+n = 80
 A = zeros(Int, n, n)
 
 # Leitura do arquivo e preenchimento da matriz
@@ -33,16 +34,11 @@ end
 
 edges = adj_matrix_to_edges(A)
 
-n = size(A, 1)
-m = sum(A) ÷ 2
+m = length(edges)
 C = 1:4
 V = 1:n
 
-
-
 model = Model(Gurobi.Optimizer)
-
-@variable(model, z[c in C], Bin)
 
 # Variáveis de decisão para vértices
 @variable(model, x[i in V, c in C], Bin)
@@ -70,9 +66,6 @@ model = Model(Gurobi.Optimizer)
 @constraint(model, neighbor_edges_1[i in V, c in C], sum(y[(i,j),c] for j in V if (i,j) in edges && i != j) + sum(y[(j,i),c] for j in V if (j,i) in edges && i != j) <= 1)
 
 
-
-
-
 # Resolve o modelo
 optimize!(model)
 
@@ -96,4 +89,3 @@ for i in 1:n
         end
     end
 end
-
