@@ -55,10 +55,84 @@ function total_coloring(A::Matrix{Int}, colors)
     @constraint(model, [i in V, j in V, c in C; i != j && A[i,j] == 1], x[i,c] + x[j,c] <= 1)
 
     # Constraint: an edge and its vertices cannot have the same color
-    @constraint(model, [e in edges, c in C], x[e[1],c] + x[e[2],c] + y[e,c] <= 2)
+    @constraint(model, [e in edges, c in C], x[e[1],c] + x[e[2],c] + y[e,c] <= 1)
 
     # Constraint: adjacent edges have different colors
     @constraint(model, [i in V, c in C], sum(y[(i,j),c] for j in V if (i,j) in edges) + sum(y[(j,i),c] for j in V if (j,i) in edges) <= 1)
+
+    #Force Coloring of some vertices
+    # fix(x[1,1],1.0)
+    # fix(x[2,4],1.0)
+    # fix(x[3,2],1.0)
+    # fix(x[4,4],1.0)
+    # fix(x[5,2],1.0)
+
+    # fix(x[12,4],1.0)
+    # fix(x[13,2],1.0)
+    # fix(x[32,4],1.0)
+    # fix(x[31,1],1.0)
+    # fix(x[30,2],1.0)
+
+    # fix(x[9,4],1.0)
+    # fix(x[10,2],1.0)
+    # fix(x[28,4],1.0)
+    # fix(x[27,1],1.0)
+    # fix(x[26,2],1.0)
+
+    # fix(x[6,4],1.0)
+    # fix(x[7,2],1.0)
+    # fix(x[24,4],1.0)
+    # fix(x[20,1],1.0)
+    # fix(x[22,2],1.0)
+
+    # fix(x[18,4],1.0)
+    # fix(x[19,2],1.0)
+    # fix(x[20,4],1.0)
+    # fix(x[39,1],1.0)
+    # fix(x[38,2],1.0)
+
+    # fix(x[15,4],1.0)
+    # fix(x[16,2],1.0)
+    # fix(x[36,4],1.0)
+    # fix(x[35,1],1.0)
+    # fix(x[34,2],1.0)
+
+    # fix(x[53,4],1.0)
+    # fix(x[54,1],1.0)
+    # fix(x[55,2],1.0)
+    # fix(x[71,2],1.0)
+    # fix(x[72,4],1.0)
+
+    # fix(x[50,1],1.0)
+    # fix(x[49,4],1.0)
+    # fix(x[51,2],1.0)
+    # fix(x[68,2],1.0)
+    # fix(x[69,4],1.0)
+
+    # fix(x[46,1],1.0)
+    # fix(x[45,4],1.0)
+    # fix(x[47,2],1.0)
+    # fix(x[66,4],1.0)
+    # fix(x[65,2],1.0)
+
+    # fix(x[41,4],1.0)
+    # fix(x[42,1],1.0)
+    # fix(x[43,2],1.0)
+    # fix(x[63,4],1.0)
+    # fix(x[62,2],1.0)
+
+    # fix(x[57,4],1.0)
+    # fix(x[58,1],1.0)
+    # fix(x[59,2],1.0)
+    # fix(x[60,4],1.0)
+    # fix(x[74,2],1.0)
+
+    # fix(x[75,4],1.0)
+    # fix(x[76,2],1.0)
+    # fix(x[77,4],1.0)
+    # fix(x[78,2],1.0)
+    # fix(x[79,1],1.0)
+
 
     # Solve the model
     optimize!(model)
@@ -120,7 +194,7 @@ function main(path::String,  colors)
     for e in adj_matrix_to_edges(A)
         for c in 1:colors
             if value(model[:y][e,c]) > 0.5
-                println("Aresta ($(e[1]),$(e[2])) colorida com a cor ", c)
+                println("Aresta ($(e[1]-1),$(e[2]-1)) colorida com a cor ", c)
             end
         end
     end
@@ -128,13 +202,13 @@ function main(path::String,  colors)
     for i in 1:size(A,1)
         for c in 1:colors
             if value(model[:x][i,c]) > 0.5
-                println("Vértice ", i, " colorido com a cor ", c)
+                println("Vértice ", i-1, " colorido com a cor ", c)
             end
         end
     end
 end
 
 # Call the main function with the desired path
-path = "D:\\GitHub - Projects\\Total Coloring\\randomgraph3regular.txt"
+path = "D:\\GitHub - Projects\\Total Coloring\\random3regulargraph10vertices.txt"
 colors = 4
 main(path, colors)
